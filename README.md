@@ -2,6 +2,7 @@
 ![banner](https://gitmsplib.github.io/MP/banner.png)
 
 # MoonPoker: PublicPage
+This repository only contains the read me for MoonPoker. If you are interested in learing more, please contact me directly at elijahwidener@vt.edu
 
 ## Table of Contents
 
