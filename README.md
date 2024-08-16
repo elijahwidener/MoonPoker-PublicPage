@@ -1,5 +1,7 @@
 # MoonPoker: Legacy Project Showcase
 
+The project's design has been largely changed from here, and is being worked on in a private reposetory. For inqires on the current stage of the project, please contact me at elijahwidener@vt.edu
+
 ![banner](https://gitmsplib.github.io/MP/banner.png)
 
 ## Table of Contents
