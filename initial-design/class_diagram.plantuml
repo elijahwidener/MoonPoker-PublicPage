@@ -1,0 +1,296 @@
+@startuml ClassDiagram
+
+title Preliminary Class Diagram
+
+skinparam linetype ortho
+
+package Backend {
+
+class Table {
+    A server-side "lobby" like object that players can join.
+
+    + acceptPlayer(player : Player&) : ???
+    + removePlayer(player : Player&) : ???
+    + acceptSpectator(player : Player&) : ???
+    + removeSpectator(player : Player&) : ???
+
+    - game : Game
+    - players : std::map<Player&, std::optional<Seat*>>
+    - seats : std::array<Seat, 9>
+}
+note right of Table
+    The table class does not actually implement any game-related logic.
+    A table is sort of like a lobby where players can sit around in.
+    Players can be part of multiple tables at once.
+
+    Because of this, Tables are a networking concept, not a game concept.
+    As such, tables should be hostable on different servers.
+    This raises the issue of how players should e able to be at different
+    tables at once and maintain state sync. Consequently, Tables should really
+    be the top-level conncetion types, agnostic to whether a player is on different
+    server or not?
+
+    This should have chat option, so there must be direct player<-> GameConnectinon connection somehow.
+    Association between PlayerConnection and a Player somehow? Players can be in
+    multiple Tables on the same server though.
+end note
+
+class Seat {
+    + getPlayer() : Player*
+    + seatPlayer(player : unique_ptr<Player>, stack : int) : void    + standUp() : void
+    + sitDown() : void
+    + leaveSeat() : void
+    + isActive() : bool
+    + topOff(amount : int) : void
+- player : std::unique_ptr<:layer>
+    - stack : int
+    - active : bool
+}
+
+abstract class PlayerConnection {
+An abstract class for the 1:1 connection to an entity that can play the game.
+
+    + {abstract} promptAction(action : GameAction) : std::future<std::expected<GameActionResponse, std::error_code>>
+    + {abstract} postGameStatus(message : GameStatus) : std::future<std::optional<std::error_code>>
+}
+note right of PlayerConnection
+    See notes on HttpPlayer. In short, because of the multiple-table requirement,
+    and the multi-server requirement, a Player should not be a global concept, 
+    but rather a server (Table) local concept.
+
+    Custom implementations of Player may be implmented as a template with mixins
+    for connection type and database storage type.
+
+    We will use overloading of promptAction for static polymorphism.
+
+    If we are using Google Protobuf, the Player will have the RPC channel.
+
+    Since the Player class is the entire client connection, it is responsible for 
+    communicating UI state changes, as well as actual game state.
+end note
+
+class ProtobufPlayerConnection {
+
+}
+PlayerConnection <|-- ProtobufPlayerConnection
+
+class HttpPlayerConnection {
+
+}
+note right of HttpPlayerConnection
+    A player that is controlled by a remote client.
+    Represents a client connection to the server.
+
+    Logically as such then, the HttpPlayer object should live on the server.
+    We've already established that the Table is the networking server concept,
+    so the HttpPlayer should be owned and exist on the same machine. As such,
+    a player cannot be a global concept. There must be some other concept for 
+    global state identification.
+end note
+PlayerConnection <|-- HttpPlayerConnection
+
+
+class TopLevelServer {
+    The chief networking multiplexer.
+}
+note top of TopLevelServer
+    The top level server is the server that is responsible for hosting the 
+    tables. It is also responsible for accepting and creating players.
+
+    Only one can exist per machine (without issues).
+end note
+
+
+class Game {
+  - ante : int
+  - small_blind : int
+  - big_blind : int
+  - num_cards : int
+  - button : int
+  - pot : int
+  - min_bet : int
+  - deck : Deck
+  - board : vector<Card>
+  - mucked_cards : vector<Card>
+  - players_in_hand : vector<Player>
+  - evaluator : unique_ptr<HandEvaluator>
+
+  + {abstract} playHand() : void
+  + {static} validateBet(bet_size : float, min_bet : float, max_bet : float) : bool
+  + closeAction(current_bet : int) : bool
+  + updateMinBet(current_bet : int) : void
+  + awardPot(player : Player, pot_amount : int) : void
+  + ~Game()
+}
+
+class Game {
+  ' Members and methods of the Game class
+}
+
+class CommunityCard {
+  - actions_on_you : vector<Player>::iterator
+  - seats : Seat[9]
+
+  + populatePlayersInHand() : void
+  + dealAndPostBlinds() : void
+  + dealCardToBoard() : void
+  + muckCommunityCards() : void
+  + resetStreet() : void
+  + bettingStreet() : void
+  + showdown(pots : vector<pair<int, vector<Player>>>) : void
+  + handleAction(current_bet : int) : void
+  + moveButton() : void
+  + ~CommunityCard()
+}
+Game <|-- CommunityCard : Refines game
+
+class Draw {
+  - actions_on_you : vector<Player>::iterator
+  - seats : Seat[8]
+
+  + populatePlayersInHand() : void
+  + dealAndPostBlinds() : void
+  + discardAndDraw(num_cards_discarded : int) : void
+  + shuffleDeck(muckedCards : vector<Card>) : void
+  + resetStreet() : void
+  + bettingStreet() : void
+  + showdown(pots : vector<pair<int, vector<Player>>>) : void
+  + handleAction(current_bet : int) : void
+  + moveButton() : void
+  + ~Draw()
+}
+Game <|-- Draw : Refines game
+
+class Stud {
+  - actions_on_you : vector<Player>::iterator
+  - seats : Seat[8]
+
+  + populatePlayersInHand() : void
+  + dealAndPostBringIn() : void
+  + dealCard(player : Player, faceUp : bool)) : void
+  + resetStreet() : void
+  + bettingStreet() : void
+  + increaseBetSize() : void
+  + showdown(pots : vector<pair<int, vector<Player>>>) : void
+  + handleAction(current_bet : int) : void
+  + moveButton() : void
+  + ~Draw()
+}
+Game <|-- Stud : Refines game
+
+class BombPots {
+    Pots that go straight to the flop 
+}
+Game <|-- BombPots
+
+object 5_Card {
+    + 5 Card Tripple Draw
+    + NL 5 Card Single Draw
+    + 2-7 Triple Draw
+    + 2-7 Single Draw
+    + A-5 Triple Draw
+    + Badacey
+    + Baduci
+}
+
+object Other_Draw {
+    + Badugi
+    + 6 Card Badacey or Baduci
+    + 7 Card Badacey or Baduci
+    * Any Combo With 6-7 Cards
+}
+Draw *-- 5_Card
+Draw *-- Other_Draw
+
+object Stud_7 {
+    + 7 Card Stud Regular
+    + 7 Card Stud Hi Lo
+    + 7 Card Flip
+    + Razz
+    + Mixed Limit 7 Card Stud 
+}
+object Stud_6 {
+    + 6 Card Stud 
+    + Mixed Limit 6 Card Stud
+}
+object Stud_5 {
+    + 5 Card Stud
+    + 5 Card Declare
+}
+Stud *-- Stud_5
+Stud *-- Stud_6
+Stud *-- Stud_7
+
+
+object Holdem {
+    + No Limit Holdem
+    + Pineapple
+    + Crazy Pineapple
+    + Lazy Pineapple
+    + Pine 4
+    + Pine 5
+    + Pine 6
+    + Limit Holdem
+}
+
+
+object Omaha{
+    + Pot Limit Omaha
+    + Limit Omaha
+    + Omaha Hi Lo 
+    + Congress
+    + Corchevel
+    + Corchevel Hi Lo
+    + Big o
+    + Drawmaha
+}
+CommunityCard *-- Omaha
+CommunityCard *-- Holdem
+
+object Bomb_Pots {
+    + PLO Double Board
+    + PLO Tripple Board
+    + Big O Double Board
+    + 6 Card PLO Double Board 
+    + Double Apple 
+    + Tripple Apple
+    + SQUID GAME!!!!!
+}
+BombPots *-- Bomb_Pots
+
+interface Hand {
+
+}
+
+Hand <|-- OmahaHand
+Hand <|-- NLHHand
+
+interface Evaluator {
+    + evaluate(Hand) : HandRank
+}
+
+interface HandRank {
+
+}
+
+Evaluator x--> Hand
+Evaluator x--> HandRank
+
+
+note as BackendNote
+    General notes:
+
+    If we pin the messages to protobuf, then what are the drawbacks? 
+
+    We definetely don't want to pin the communication to gRPC, but that is easy 
+    to avoid, since Protobuf generates ...Service interfaces.
+end note
+
+}
+
+Table <--o TopLevelServer
+Table "1" *--> "1" Game
+Table o--> PlayerConnection
+Game x--> PlayerConnection
+
+@enduml

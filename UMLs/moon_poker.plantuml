@@ -1,0 +1,29 @@
+@startuml
+
+!include backend.plantuml
+!include frontend.plantuml
+
+package "Proto Generator" {
+  !include proto_parsing.plantuml
+}
+
+Frontend --> ApiService: HTTP requests
+Frontend --> WebSocketService: WebSocket connection
+ApiService --> Backend: HTTP requests (ApiService)
+WebSocketService --> Backend: WebSocket messages (WebSocketService))
+
+ProtoGenerator --> "Generated Proto Code": Generates
+
+"Generated Proto Code" --> Frontend: Used for serialization
+"Generated Proto Code" --> Backend: Used for deserialization
+
+"User Input" --> Frontend: User inputs\n(HTTP, WebSocket)
+
+note right of Frontend
+By using HTTP for the initial setup and navigation, we can leverage its simplicity, 
+statelessness, and compatibility. Then, once a game session is established or real-time 
+updates are required, we can switch to using WebSockets for efficient, bidirectional 
+communication between the Frontend and Backend.
+end note
+
+@enduml

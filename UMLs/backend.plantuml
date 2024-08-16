@@ -1,0 +1,205 @@
+@startuml
+package "Backend" {
+  package "Evaluators" {
+    abstract class HandEvaluator {
+      +evaluateHand(hand: vector<Card>): long long
+      +evaluateHand(hand: vector<Card>, board: vector<Card>): long long
+    }
+
+    class StandardEvaluator extends HandEvaluator {
+      +evaluateHand(hand: vector<Card>): long long
+      +evaluateHand(hand: vector<Card>, board: vector<Card>): long long
+      -kickers(uniqueRanks: vector<int>, numKickers: int): long long
+      -isStraight(uniqueRanks: vector<int>): int
+      -isFlush(handPlusBoard: vector<Card>): bool
+    }
+
+    class OmahaEvaluator extends StandardEvaluator {
+      +evaluateHand(hand: vector<Card>, board: vector<Card>): long long
+    }
+
+    class OmahaEightEvaluator extends HandEvaluator {
+      +evaluateHand(hand: vector<Card>, board: vector<Card>): long long
+      +evaluateHand(hand: vector<Card>): long long
+      -populateRanks(cards: vector<Card>, ranks: set<int>, eightOrBetter: bool): void
+    }
+
+    class LowballEvaluator extends HandEvaluator {
+      +evaluateHand(hand: vector<Card>): long long
+      -populateRanks(cards: vector<Card>, ranks: set<int>, eightOrBetter: bool): void
+      -evaluateLowballNoHighCard(hand: vector<Card>): long long
+    }
+  }
+
+  package "Games" {
+    abstract class Game {
+      #ante: int
+      #smallBlind: int
+      #bigBlind: int
+      #numCards: int
+      #button: int
+      #minBet: int
+      #pots: vector<pair<int, vector<reference_wrapper<PlayerState>>>>
+      #deck: Deck
+      #board: vector<Card>
+      #muckedCards: vector<Card>
+      #playersInHand: vector<reference_wrapper<PlayerState>>
+      #evaluator: unique_ptr<HandEvaluator>
+      +Game(ante: int, smallBlind: int, bigBlind: int, numCards: int, evaluator: unique_ptr<HandEvaluator>)
+      +playHand(): void
+      +validateBet(betSize: float, minBet: float, maxBet: float): bool
+      +addToPot(amount: int): void
+      +collectBets(currentPlayers: vector<reference_wrapper<PlayerState>>): void
+      +closeAction(currentBet: int): bool
+      +updateMinBet(currentBet: int): void
+      +awardPot(player: PlayerState, potAmount: float, potIndex: int): void
+      +serialize(): GameStateRequest
+      +serializePot(pot: pair<int, vector<reference_wrapper<PlayerState>>>): PotSerializable
+      +deserializePot(serialized: PotSerializable): pair<int, vector<reference_wrapper<PlayerState>>>
+    }
+
+    class CommunityCard extends Game {
+      #seats: array<Seat, 9>
+      +CommunityCard(ante: int, smallBlind: int, bigBlind: int, numCards: int, evaluator: unique_ptr<HandEvaluator>)
+      +populatePlayersInHand(): void
+      +dealAndPostBlinds(): void
+      +dealCardToBoard(): void
+      +muckCommunityCards(): void
+      +resetStreet(): void
+      +bettingStreet(): void
+      +showdown(): void
+      +handleAction(currentBet: int): void
+      +moveButton(): void
+    }
+
+    class NoLimitHoldem extends CommunityCard {
+      +NoLimitHoldem(ante: int, smallBlind: int, bigBlind: int)
+      +playHand(): void
+    }
+    struct GameSettings {
+    +ante: int
+    +smallBlind: int
+    +bigBlind: int
+    +time: int
+    +numCards: int
+  }
+  }
+
+
+
+  class Deck {
+    -muckedCards: vector<Card>
+    -decksCards: vector<Card>
+    +Deck()
+    +shuffle(muckedCards: vector<Card>): void
+    +deal(): Card
+  }
+
+  struct Card<MessageBase> {
+    +rank: MessageField<1, Int32>
+    +suit: MessageField<2, Int32>
+    +<<(os: ostream, card: Card): ostream
+    +Card(r: Rank, s: Suit)
+    +getRank(): Rank
+    +getSuit(): Suit
+  }
+
+  enum Rank {
+    Two
+    Three
+    Four
+    Five
+    Six
+    Seven
+    Eight
+    Nine
+    Ten
+    Jack
+    Queen
+    King
+    Ace
+  }
+
+  enum Suit {
+    Club
+    Diamond
+    Heart
+    Spade
+  }
+
+  class PlayerState<MessageBase>{
+    +stack: MessageField<1, Int32>
+    +totalBetInRound: MessageField<2, Int32>
+    +hand: Optional<Array<MessageField<3, Card>>>
+    +allInFlag: MessageField<4, Bool>
+    +PlayerState(stack: int)
+    +getHand(): vector<Card>
+    +getTotalBetInRound(): int
+    +getStack(): int
+    +isAllIn(): bool
+    +makeBet(newBet: int): void
+    +resetBetting(): void
+    +moveBetToPot(amount: int): void
+    +dealCards(numCards: int, deck: Deck*): void
+    +subtractStack(amount: int): void
+    +addToStack(amount: int): void
+    +action(currentBet: int&, minBet: int): int
+    +addToPot(currentBet: int, player: PlayerState): void
+    +muckCards(muckedCards: vector<Card>): void
+  }
+
+  class Seat<MessageBase> {
+    -player: Optional<MessageField<1, PlayerState>>
+    -stack: MessageField<2, Int32>
+    -active: MessageField<3, Bool>
+    +Seat()
+    +getPlayer(): PlayerState
+    +seatPlayer(player: PlayerState&, stack: int): void
+    +standUp(): void
+    +sitDown(): void
+    +leaveSeat(): void
+    +isActive(): bool
+    +topOff(amount: int): void
+  }
+
+  class AbstractPlayerConnection {
+    +pureVirtualFunction(): void
+    +promptPlayerAction(): void
+    +changeGameStatus(): void
+  }
+
+
+
+  class Table {
+    -game: Game
+    -Players: map<Player, optional<Seat>>
+    -seats: array<Seat>
+    +Table(deck: Deck&, settingsStruct: Settings)
+    +acceptPlayer(player: Player&, seat: Seat, stack: int): void
+    +kickPlayer(player: Player&): void
+  }
+
+  HandEvaluator <-- StandardEvaluator
+  HandEvaluator <-- OmahaEvaluator
+  HandEvaluator <-- OmahaEightEvaluator
+  HandEvaluator <-- LowballEvaluator
+
+  Game <-- CommunityCard
+  CommunityCard <-- NoLimitHoldem
+
+  Game --> Deck
+  Game --> PlayerState
+  Game --> HandEvaluator
+
+  Deck --> Card
+  Seat --> PlayerState
+  Table --> Seat
+  Table --> Game
+  Table --> Deck
+
+  Card *-- Rank
+  Card *-- Suit
+
+
+}
+@enduml
