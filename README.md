@@ -30,9 +30,10 @@ The project includes several detailed UML diagrams that illustrate the system's 
 
 1. **Class Diagram**: Showcases the relationships between key classes in the poker game engine.
 2. **Sequence Diagram**: Demonstrates the flow of a typical poker hand.
-3. **State Diagram**: Illustrates the different states a poker game can be in.
+3. **Network Diagram**: Illustrates how we visioned netorking working.
 
-[Include or link to your UML diagrams here]
+![Comprehensive UML diagram](https://github.com/elijahwidener/MoonPoker-PublicPage/raw/main/UMLs/UML.png)
+
 
 ### Key OOP Concepts Demonstrated
 
