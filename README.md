@@ -36,7 +36,7 @@ The project includes several detailed UML diagrams that illustrate the system's 
 2. **Sequence Diagram**: Demonstrates the flow of a typical poker hand.
 3. **Network Diagram**: Illustrates how we visioned netorking working.
 
-![Comprehensive UML diagram](https://github.com/elijahwidener/MoonPoker-PublicPage/raw/main/UMLs/UML.png)
+![Comprehensive UML diagram (Legacy)](https://github.com/elijahwidener/MoonPoker-PublicPage/raw/main/UMLs/UML.png)
 
 
 ### Key OOP Concepts Demonstrated
