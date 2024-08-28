@@ -15,6 +15,8 @@ The project's design has been largely changed from here, and is being worked on 
 
 MoonPoker was an ambitious project aimed at creating an online web app for playing poker in your browser with friends. While the project has since evolved, this repository showcases the legacy codebase as a completed project, demonstrating sophisticated object-oriented design principles and detailed UML modeling.
 
+![Fun video of when I got the TUI finished](https://github.com/elijahwidener/MoonPoker-PublicPage/blob/main/TUI_working.mp4)
+
 ## Features
 
 - **Multi-Game Support**: Designed to support Stud, Draw, and Community Card Variants of Poker.
