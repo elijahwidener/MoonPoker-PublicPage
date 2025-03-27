@@ -1,69 +1,121 @@
-# MoonPoker: Legacy Project Showcase
-
-The project's design has been largely changed from here, and is being worked on in a private reposetory. For inqires on the current stage of the project, please contact me at elijahwidener@vt.edu
+# MoonPoker: High-Performance Poker Engine and Network Framework
 
 ![banner](https://gitmsplib.github.io/MP/banner.png)
 
 ## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Technical Architecture](#technical-architecture)
+3. [Current Status](#current-status)
+4. [Technologies](#technologies)
+5. [Key Features](#key-features)
+6. [Contact](#contact)
 
-1. [Introduction](#introduction)
-2. [Features](#features)
-3. [Legacy Design](#legacy-design)
-4. [Technologies Used](#technologies-used)
+## Project Overview
 
-## Introduction
+MoonPoker is a modern poker platform designed to provide a high-performance, low-latency poker experience. The project features a modular architecture with a C++ game engine core, networked gameplay capabilities, and a cross-platform Flutter client. Our design focuses on performance, scalability, and clean separation of concerns.
 
-MoonPoker was an ambitious project aimed at creating an online web app for playing poker in your browser with friends. While the project has since evolved, this repository showcases the legacy codebase as a completed project, demonstrating sophisticated object-oriented design principles and detailed UML modeling.
+![Poker Game Demo](https://github.com/elijahwidener/MoonPoker-PublicPage/blob/main/TUI_working.mp4)
 
-![Fun video of when I got the TUI finished](https://github.com/elijahwidener/MoonPoker-PublicPage/blob/main/TUI_working.mp4)
+## Technical Architecture
 
-## Features
+MoonPoker employs a layered architecture:
 
-- **Multi-Game Support**: Designed to support Stud, Draw, and Community Card Variants of Poker.
-- **Game-Modifications**: Planned support for Hi-Lo variants, bounties, and bomb pots.
-- **User Profiles**: Infrastructure for creating and customizing player profiles.
-- **Responsive Design**: Architected with a focus on both web and mobile optimization.
+### Core Game Engine (C++)
+- **High-performance** poker logic implementation
+- **Deterministic evaluation** of poker hands
+- **Constant-time** operations for critical path functions
+- **Memory-efficient** state management
 
-## Legacy Design
+### Network Layer (C++ with gRPC)
+- **Server implementation** with concurrent game management
+- **Real-time communication** for gameplay events
+- **Secure authentication** system
+- **Game state synchronization** with optimized protocols
 
-The legacy codebase of MoonPoker exemplifies a robust object-oriented programming (OOP) approach:
+### Client Application (Flutter/Dart)
+- **Cross-platform** support (Web, iOS, Android)
+- **Responsive UI** design for different screen sizes
+- **State management** with modern reactive patterns
+- **Offline capabilities** for practice play
 
-### UML Diagrams
+### Web Services (JavaScript)
+- **Lobby system** for game discovery and joining
+- **User account management** with authentication
+- **Social features** including friends and messaging
+- **Tournament management** for competitive play
+- **RESTful API** for client-server communication
 
-The project includes several detailed UML diagrams that illustrate the system's architecture:
+## Repository Structure
 
-1. **Class Diagram**: Showcases the relationships between key classes in the poker game engine.
-2. **Sequence Diagram**: Demonstrates the flow of a typical poker hand.
-3. **Network Diagram**: Illustrates how we visioned netorking working.
+The project is organized into separate repositories for each major component:
 
-![Comprehensive UML diagram (Legacy)](https://github.com/elijahwidener/MoonPoker-PublicPage/blob/main/UMLs/backend.png)
+- **moonpoker-engine**: C++ game core and poker logic
+- **moonpoker-client**: Flutter-based cross-platform client
+- **moonpoker-lobby**: JavaScript-based lobby and user management including authentication
 
+This separation allows specialized teams to work on different components using the most appropriate technology for each domain.
 
-### Key OOP Concepts Demonstrated
+## Current Status
 
-- **Encapsulation**: Clear separation of concerns with well-defined class structures.
-- **Inheritance**: Utilization of base classes for common poker elements with specialized subclasses.
-- **Polymorphism**: Flexible design allowing for different poker variants and game rules.
-- **Abstraction**: High-level interfaces for game mechanics, separating implementation details.
+### Completed Components:
+- ✅ Core poker game engine (Texas Hold'em)
+- ✅ Hand evaluation algorithms
+- ✅ Game state management
+- ✅ Client-server communication protocol
+- ✅ Basic server implementation with gRPC
+- ✅ Container-based deployment configuration
+- ✅ User authentication API
+- ✅ Basic lobby system
 
-### Code Structure
+### In Progress:
+- 🔄 Flutter client implementation refinement
+- 🔄 Expanded lobby features
+- 🔄 Game matching algorithms
+- 🔄 User profiles and social features
+- 🔄 Production server deployment
 
-The legacy codebase was organized into several key modules:
+## Technologies
 
-- `GameEngine`: Core logic for managing game state and rules.
-- `PlayerManagement`: Handling player data, actions, and state.
-- `CardDeck`: Implementation of card deck operations.
-- `HandEvaluator`: Logic for evaluating and comparing poker hands.
-- `UIController`: Abstractions for user interface interactions.
+### Backend (Game Engine)
+- **C++17/20**: Core engine implementation
+- **CMake**: Build system management
+- **Google Protocol Buffers**: Data serialization
+- **gRPC**: Network communication
+- **Docker**: Containerization (to be changed to EKS)
+- **Envoy**: API gateway for gRPC-Web
+- **spdlog**: Logging framework
 
-## Technologies Used
+### Backend (Web Services)
+- **Node.js/Express**: RESTful API services
+- **PostgreSQL**: User and lobby data storage
+- **JWT**: Authentication tokens
 
-The legacy project was built using:
+### Frontend
+- **Flutter/Dart**: Cross-platform client application
+- **gRPC-Web**: Client-server communication for game
+- **Provider/Riverpod**: State management
+- **Flutter Secure Storage**: Local credential storage
 
-- **Backend**: C++
-- **Build System**: CMake
-- **Testing**: Google Test
-- **Serialization**: Google Protobuf
-- **Documentation**: Doxygen
+### Testing & Quality
+- **Google Test**: C++ unit testing
+- **Jest**: JavaScript testing
+- **Clang Format**: Code style enforcement
+- **Doxygen**: Documentation generation
 
-This project serves as a testament to thoughtful software design and architecture in game development.
+## Key Features
+
+- **Modern C++ Game Core**: Leveraging modern C++ features for performance and safety
+- **JavaScript Web Services**: Familiar web stack for user management and lobby features
+- **Cross-Platform Client**: Play on web, mobile, or desktop
+- **Networked Gameplay**: Multiplayer with low-latency synchronization
+- **Modular Architecture**: Clean separation between game rules, networking, and presentation
+- **Extensible Design**: Support for additional poker variants planned
+
+## Contact
+
+For inquiries about the current stage of the project, please contact:
+- Email: elijahwidener@vt.edu
+- GitHub: [elijahwidener](https://github.com/elijahwidener)
+
+---
+© 2025 MoonPoker Project
