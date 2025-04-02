@@ -1,4 +1,4 @@
-# MoonPoker: High-Performance Poker Engine and Network Framework
+# MoonPoker: Actual code is being worked in in private repositories
 
 ![banner](https://gitmsplib.github.io/MP/banner.png)
 
